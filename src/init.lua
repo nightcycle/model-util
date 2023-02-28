@@ -12,7 +12,7 @@ local Util = {}
 
 function transformModel(model: Model, scale: number, goal: CFrame)
 	local origin = Util.getCFrame(model)
-
+	
 	local function getFinalCFrame(instOrigin: CFrame)
 		local instOffset = origin:Inverse() * instOrigin
 		return goal * CFrame.fromMatrix(
@@ -24,6 +24,10 @@ function transformModel(model: Model, scale: number, goal: CFrame)
 	end
 
 	local function setChildren(inst: Instance)
+		local primaryPart: BasePart?
+		if inst:IsA("Model") then
+			primaryPart = inst.PrimaryPart
+		end
 		local orphans: {[number]: Instance} = {}
 		for i, v in ipairs(inst:GetChildren()) do
 			if v:IsA("BasePart") then
@@ -46,6 +50,9 @@ function transformModel(model: Model, scale: number, goal: CFrame)
 		end
 		if inst:IsA("Model") then
 			inst:PivotTo(getFinalCFrame(inst:GetPivot()))
+			if primaryPart then
+				inst.PrimaryPart = primaryPart
+			end
 		end
 		for i, v in ipairs(orphans) do
 			v.Parent = inst
