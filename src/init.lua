@@ -4,6 +4,7 @@
 local Package = script
 local Packages = Package.Parent
 local MeshUtil = require(Packages:WaitForChild("MeshUtil"))
+local CFrameUtil = require(Packages:WaitForChild("CFrameUtil"))
 --Modules
 --Types
 --Constants
@@ -14,13 +15,7 @@ function transformModel(model: Model, scale: number, goal: CFrame)
 	local origin = Util.getCFrame(model)
 	
 	local function getFinalCFrame(instOrigin: CFrame)
-		local instOffset = origin:Inverse() * instOrigin
-		return goal * CFrame.fromMatrix(
-			instOffset.Position * scale,
-			instOffset.XVector,
-			instOffset.YVector,
-			instOffset.ZVector
-		)
+		return goal * CFrameUtil.setScale(origin:Inverse() * instOrigin, scale)
 	end
 
 	local function setChildren(inst: Instance)
@@ -45,8 +40,11 @@ function transformModel(model: Model, scale: number, goal: CFrame)
 			end
 		end
 		if inst:IsA("BasePart") then
+			local cf = inst:GetPivot()
+			local offset = CFrameUtil.setScale(inst.PivotOffset, scale)
 			inst.Size *= scale
-			inst:PivotTo(getFinalCFrame(inst:GetPivot()))
+			inst.PivotOffset = offset
+			inst:PivotTo(getFinalCFrame(cf))
 		end
 		if inst:IsA("Model") then
 			inst:PivotTo(getFinalCFrame(inst:GetPivot()))
@@ -86,8 +84,8 @@ function Util.getCFrame(model: Model, usePrimaryPart: boolean?): CFrame
 	end
 end
 
-function Util.setScale(model: Model, goal: number)
-	transformModel(model, goal, Util.getCFrame(model))
+function Util.setScale(model: Model, goal: number, cf: CFrame?)
+	transformModel(model, goal, cf or Util.getCFrame(model))
 	return nil
 end
 
