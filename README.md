@@ -1,2 +1,2 @@
-# package
-A basic template for whenever I make a wally package
+# model-util
+A place to put basic model functions
